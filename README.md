@@ -84,11 +84,12 @@ is not searched.
 
 An Authorizer that returns an error is an internal error, never an allow.
 
-`authz.Owner` is the first Authorizer, for a service in which a resource belongs
-to one caller. It asks the service for the owner of the root of the name:
+`authz.OwnerAuthorizer` is the first Authorizer, for a service in which a
+resource belongs to one caller. It asks the service for the owner of the root of
+the name:
 
 ```go
-owner := authz.Owner{
+authorizer := authz.OwnerAuthorizer{
 	OwnerOf: func(ctx context.Context, name string) (string, error) {
 		owner, err := queries.GetShelfOwner(ctx, name)
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -98,7 +99,7 @@ owner := authz.Owner{
 	},
 }
 
-guard := authz.NewInterceptor(owner)
+guard := authz.NewInterceptor(authorizer)
 ```
 
 A resource that does not exist and one that is someone else's are refused alike,
@@ -131,7 +132,7 @@ guard := authn.NewInterceptor(verifier, authn.WithErrorMapper(func(why error) er
 	return Unauthenticated(ReasonCredentialsInvalid, why)
 }))
 
-check := authz.NewInterceptor(owner, authz.WithErrorMapper(func(why error) error {
+check := authz.NewInterceptor(authorizer, authz.WithErrorMapper(func(why error) error {
 	var denied *authz.PermissionDeniedError
 	if errors.As(why, &denied) {
 		return PermissionDenied(denied.Request.Resource, why) // names the resource, in its own details
