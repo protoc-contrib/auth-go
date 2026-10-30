@@ -20,13 +20,13 @@ type options struct {
 type Option func(*options)
 
 // WithErrorMapper answers a refused request with the error mapper returns for
-// why, in place of the default: a *[DeniedError] for a request the Authorizer
-// did not allow, an error that wraps [ErrAuthorizationFailed] and the
-// Authorizer's own for one it could not decide, and [authn.ErrCredentialsMissing]
-// for a call without a caller. A service gives the refusal its own shape this
-// way, with the details and the domain of its errors, and names the resource
-// from the request a *DeniedError holds. A mapper that returns nil falls back
-// to the default.
+// why, in place of the default: a *[PermissionDeniedError] for a request the
+// Authorizer did not allow, an error that wraps [ErrAuthorizationFailed] and
+// the Authorizer's own for one it could not decide, and
+// [authn.ErrCredentialsMissing] for a call without a caller. A service gives
+// the refusal its own shape this way, with the details and the domain of its
+// errors, and names the resource from the request a *PermissionDeniedError
+// holds. A mapper that returns nil falls back to the default.
 func WithErrorMapper(mapper func(err error) error) Option {
 	return func(o *options) {
 		o.mapper = mapper
@@ -82,7 +82,7 @@ func (s *authorizedStream) Receive(message any) error {
 	req := Request{Subject: s.subject, Procedure: s.procedure}
 	request, ok := message.(proto.Message)
 	if !ok {
-		return s.cfg.refuse(&DeniedError{Request: req})
+		return s.cfg.refuse(&PermissionDeniedError{Request: req})
 	}
 	req.Resource = resourceName(request)
 	allowed, err := s.authorizer.Authorize(s.ctx, req)
@@ -90,7 +90,7 @@ func (s *authorizedStream) Receive(message any) error {
 		return s.cfg.refuse(fmt.Errorf("%w: %w", ErrAuthorizationFailed, err))
 	}
 	if !allowed {
-		return s.cfg.refuse(&DeniedError{Request: req})
+		return s.cfg.refuse(&PermissionDeniedError{Request: req})
 	}
 	return nil
 }
