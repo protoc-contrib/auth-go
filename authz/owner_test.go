@@ -10,19 +10,19 @@ import (
 	"github.com/protoc-contrib/auth-go/authz"
 )
 
-var _ = Describe("Owner", func() {
+var _ = Describe("OwnerAuthorizer", func() {
 	var (
 		owners map[string]string
 		asked  []string
 		err    error
-		owner  authz.Owner
+		owner  authz.OwnerAuthorizer
 	)
 
 	BeforeEach(func() {
 		owners = map[string]string{"shelves/s1": "alice"}
 		asked = nil
 		err = nil
-		owner = authz.Owner{OwnerOf: func(_ context.Context, name string) (string, error) {
+		owner = authz.OwnerAuthorizer{OwnerOf: func(_ context.Context, name string) (string, error) {
 			asked = append(asked, name)
 			if err != nil {
 				return "", err
