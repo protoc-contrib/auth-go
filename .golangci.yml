@@ -1,0 +1,15 @@
+version: "2"
+
+# The default set -- errcheck, govet, ineffassign, staticcheck, unused -- and
+# gofumpt, a stricter gofmt. Generated files (`// Code generated ... DO NOT
+# EDIT.`) are skipped by golangci-lint itself.
+linters:
+  default: standard
+  exclusions:
+    presets:
+      # A deferred Close, a Flush, a print: nobody handles their errors.
+      - std-error-handling
+
+formatters:
+  enable:
+    - gofumpt

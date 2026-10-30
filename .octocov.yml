@@ -1,0 +1,9 @@
+coverage:
+  paths:
+    - "coverage.out"
+  # The packages have no code that a spec cannot reach.
+  acceptable: 100%
+comment:
+  if: is_pull_request
+  deletePrevious: true
+summary:
