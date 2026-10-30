@@ -4,9 +4,7 @@
 [![Go](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)](https://go.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Connect interceptors that authenticate and authorize the RPCs of a Go server,
-for the services built from
-[grpc-go-template](https://github.com/protoc-contrib/grpc-go-template).
+Connect interceptors that authenticate and authorize the RPCs of a Go server.
 
 Two packages, which a service uses together or apart:
 
