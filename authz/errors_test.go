@@ -32,19 +32,19 @@ var _ = Describe("Refusals", func() {
 		seen = nil
 	})
 
-	Describe("DeniedError", func() {
+	Describe("PermissionDeniedError", func() {
 		It("names the caller, the procedure and the resource, for the log", func() {
-			err := &authz.DeniedError{Request: authz.Request{Subject: "alice", Procedure: procedure, Resource: "books/1"}}
+			err := &authz.PermissionDeniedError{Request: authz.Request{Subject: "alice", Procedure: procedure, Resource: "books/1"}}
 
 			Expect(err.Error()).To(Equal(`authz: "alice" may not call /test.v1.LibraryService/GetBook on "books/1"`))
 		})
 	})
 
 	When("there is no mapper", func() {
-		It("carries a *DeniedError, holding the request, as the cause of a request that is not allowed", func() {
+		It("carries a *PermissionDeniedError, holding the request, as the cause of a request that is not allowed", func() {
 			err := call(ctx, auth, get(), empty("GetBookRequest"))
 
-			var denied *authz.DeniedError
+			var denied *authz.PermissionDeniedError
 			Expect(errors.As(err, &denied)).To(BeTrue())
 			Expect(denied.Request).To(Equal(authz.Request{Subject: "alice", Procedure: procedure, Resource: "books/1"}))
 		})
@@ -69,23 +69,23 @@ var _ = Describe("Refusals", func() {
 	When("there is a mapper", func() {
 		opt := authz.WithErrorMapper(mapper)
 
-		It("is given a *DeniedError holding the request, and its error is the answer", func() {
+		It("is given a *PermissionDeniedError holding the request, and its error is the answer", func() {
 			err := call(ctx, auth, get(), empty("GetBookRequest"), opt)
 
 			Expect(errors.Is(err, mapped)).To(BeTrue())
 			Expect(seen).To(HaveLen(1))
-			var denied *authz.DeniedError
+			var denied *authz.PermissionDeniedError
 			Expect(errors.As(seen[0], &denied)).To(BeTrue())
 			Expect(denied.Request).To(Equal(authz.Request{Subject: "alice", Procedure: procedure, Resource: "books/1"}))
 		})
 
-		It("is given a *DeniedError that names no resource for a message that is not a protobuf message", func() {
+		It("is given a *PermissionDeniedError that names no resource for a message that is not a protobuf message", func() {
 			var text string
 
 			err := call(ctx, auth, &stream{}, &text, opt)
 
 			Expect(errors.Is(err, mapped)).To(BeTrue())
-			var denied *authz.DeniedError
+			var denied *authz.PermissionDeniedError
 			Expect(errors.As(seen[0], &denied)).To(BeTrue())
 			Expect(denied.Request).To(Equal(authz.Request{Subject: "alice", Procedure: procedure}))
 		})
@@ -112,7 +112,7 @@ var _ = Describe("Refusals", func() {
 			err := call(ctx, auth, get(), empty("GetBookRequest"), authz.WithErrorMapper(nothing))
 
 			Expect(connect.CodeOf(err)).To(Equal(connect.CodePermissionDenied))
-			var denied *authz.DeniedError
+			var denied *authz.PermissionDeniedError
 			Expect(errors.As(err, &denied)).To(BeTrue())
 		})
 	})

@@ -117,7 +117,7 @@ cause, for your error interceptor to log; the cause never reaches the client.
 | --- | --- | --- |
 | no credential | `Unauthenticated` | `authn.ErrCredentialsMissing` |
 | a credential the verifier refused | `Unauthenticated` | `authn.ErrCredentialsInvalid`, wrapping the verifier's error |
-| a request the `Authorizer` did not allow | `PermissionDenied` | `*authz.DeniedError`, holding the `Request` |
+| a request the `Authorizer` did not allow | `PermissionDenied` | `*authz.PermissionDeniedError`, holding the `Request` |
 | an `Authorizer` that could not decide | `Internal` | `authz.ErrAuthorizationFailed`, wrapping its error |
 
 The library does not decide what a client is told beyond that. A service gives
@@ -134,7 +134,7 @@ guard := authn.NewInterceptor(verifier, authn.WithErrorMapper(func(why error) er
 }))
 
 check := authz.NewInterceptor(owner, authz.WithErrorMapper(func(why error) error {
-	var denied *authz.DeniedError
+	var denied *authz.PermissionDeniedError
 	if errors.As(why, &denied) {
 		return PermissionDenied(denied.Request.Resource, why) // names the resource, in its own details
 	}
